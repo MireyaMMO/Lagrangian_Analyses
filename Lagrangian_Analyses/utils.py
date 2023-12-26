@@ -22,7 +22,22 @@ def xy2sph(x, lambda1, y, theta1):
     theta0 = theta1 + y / R / deg2rad
     return lambda0, theta0
 
-
+def make_nan_array(i,j=None,k=None,l=None):
+    ##Makes arrays fill of NaN##
+    if i and not j:
+        arr = np.zeros((i))
+        arr *= np.nan 
+    elif j and not k:
+        arr = np.zeros((i,j))
+        arr *= np.nan  
+    elif k and not l:
+        arr = np.zeros((i,j,k))
+        arr *= np.nan        
+    elif l:
+        arr = np.zeros((i,j,k,l))
+        arr *= np.nan  
+    return arr 
+        
 def get_colourmap(name):
     if name == "Zissou":
         colors = [
