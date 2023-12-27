@@ -24,7 +24,7 @@ class opendrift_run(object):
             path of the directory where to save the output
         id: str
             Id to identify the experiment
-        var_dict: dict
+        vars_dict: dict
             Dictionary containing the names associated to the depth and time variables within the file. Default ROMS convention: {"depth": "h", "time": "ocean_time"}
 
     OpenDrift Parameters
@@ -52,6 +52,8 @@ class opendrift_run(object):
             Ignores the last (defined number) of locations given, useful when using release on isobath. Default -1
         release_interval: int
             Particle release interval in hours. Default 3
+        release_until: int
+            Define how many days until particles are stop being released in seconds. Default 10 days 
         advection_duration: int
             Advection duration in days. Default 50
         cluster_std: int
@@ -115,35 +117,35 @@ class opendrift_run(object):
         outdir,
         id=None,
         vars_dict={'time':'ocean_time', 'depth':'h'},
-        log_level=50,
-        opendrift_reader="reader_ROMS_native",
-        opendrift_model="OceanDrift",
-        number_of_particles=20,
-        # number_of_release_locations=20,
-        spacing_locations=10,
-        ignore_first=0,
-        ignore_last=-1,
+        log_level = 50,
+        opendrift_reader = "reader_ROMS_native",
+        opendrift_model = "OceanDrift",
+        number_of_particles = 20,
+        cluster_std = 0.003,
+        random_depth = 20,
+        depth = 0,
+        release_on_isobath = 200,
+        spacing_locations = 10,
+        ignore_first = 0,
+        ignore_last = -1,
+        release_locations=False,
         release_interval=3,
-        advection_duration=50*24*3600,
-        release_on_isobath=None,
-        release_locations=None,
-        cluster_std=0.003,
-        random_depth=True,
-        depth=0,
+        release_until = 10*24*3600,
+        advection_duration=5*24*3600,
         max_speed=5,
         advection_scheme="runge-kutta4",
         horizontal_diffusivity=0.1,
+        time_step_advection=900,
+        time_step_output=3600 * 3,
+        coastline_action="stranding",
         vertical_motion=True,
         vertical_diffusivity=0.001,
         vertical_mixing_timestep=90,
-        coastline_action="stranding",
         behaviour=False,
-        max_age_seconds=30 * 24 * 3600,
+        max_age_seconds=None,
         min_settlemente_age=0,
         maximum_depth=False,
         habitat=False,
-        time_step_advection=900,
-        time_step_output=3600 * 3,
         first_and_last_position=False,
     ):
         # self.month = month
@@ -151,6 +153,8 @@ class opendrift_run(object):
         # self.year = str(year)
         self.file_path = file_path
         self.outdir = outdir
+        self.id = id
+        self.vars_dict = vars_dict
 
         self.opendrift_reader = opendrift_reader
         self.opendrift_model = opendrift_model
@@ -159,12 +163,13 @@ class opendrift_run(object):
         self.number_of_particles = number_of_particles
         # self.number_of_release_locations = number_of_release_locations
         self.release_interval = release_interval
+        self.release_until = release_until
         self.advection_duration = advection_duration
         self.release_on_isobath = release_on_isobath
         self.release_locations = release_locations
-        self.spacing_locations = (spacing_locations,)
-        self.ignore_first = (ignore_first,)
-        self.ignore_last = (ignore_last,)
+        self.spacing_locations = spacing_locations
+        self.ignore_first = ignore_first
+        self.ignore_last = -ignore_last
         self.cluster_std = cluster_std
 
         self.random_depth = random_depth
@@ -232,37 +237,38 @@ class opendrift_run(object):
         o.set_config("general:coastline_action", self.coastline_action)
         return o, reader
 
-    def set_opendrift_vertical_motion_configuration(self, o):
-        o.set_config("drift:vertical_mixing", self.vertical_mixing)
-        o.set_config("drift:vertical_advection", self.vertical_advection)
+    def set_opendrift_vertical_motion_configuration(self):
+        self.o.set_config("drift:vertical_mixing", self.vertical_mixing)
+        self.o.set_config("drift:vertical_advection", self.vertical_advection)
         Kz = self.vertical_diffusivity  # m2/s-1
-        o.set_config(
+        self.o.set_config(
             "environment:fallback:ocean_vertical_diffusivity", Kz
         )  # specify constant ocean_vertical_diffusivity in m2.s-1
-        o.set_config(
+        self.o.set_config(
             "vertical_mixing:diffusivitymodel", "constant"
         )  # constant or environment
-        o.set_config(
+        self.o.set_config(
             "vertical_mixing:timestep", self.vertical_mixing_timestep
         )  # if some ocean_vertical_diffusivity!=0, turbulentmixing:timestep should be << 900 seconds
         # else:
         #    o.disable_vertical_motion()
 
-    def set_opendrift_behaviour_configuration(self, o):
-        o.set_config("drift:max_age_seconds", self.max_age_seconds)
-        o.set_config("drift:min_settlement_age_seconds", self.min)
-        o.set_config("drift:maximum_depth", -50)
+    def set_opendrift_behaviour_configuration(self):
+        self.o.set_config("drift:max_age_seconds", self.max_age_seconds)
+        self.o.set_config("drift:min_settlement_age_seconds", self.min)
+        self.o.set_config("drift:maximum_depth", -50)
 
-    def set_opendrift_habitat_settlement(self, o):
-        o.habitat(self.habitat)
-        o.set_config("drift:settlement_in_habitat", True)
+    def set_opendrift_habitat_settlement(self):
+        self.o.habitat(self.habitat)
+        self.o.set_config("drift:settlement_in_habitat", True)
 
     def set_runtime(self, ds):
         start_time = pd.to_datetime(ds["ocean_time"][0].values)
-        end_time = start_time + timedelta(hours=self.advection_duration)
+        end_time = start_time + timedelta(seconds=self.release_until)
+        self.run_until = start_time + timedelta(seconds=self.advection_duration)
         return [start_time, end_time]
 
-    def create_seed_times(start, end, delta):
+    def create_seed_times(self,start, end, delta):
         """
         create times at given interval to seed particles
         """
@@ -275,14 +281,18 @@ class opendrift_run(object):
         return out
 
     def get_release_locations(self, ds, reader):
-        h = ds[self.depth_var]
+        h = ds[self.depth_var].values
+        if len(h.shape)>2:
+            h = h[0,:,:]
         lon = reader.lon
         lat = reader.lat
         latf = lon.flatten()
         lonf = lat.flatten()
         if self.release_on_isobath:
             self.isobath_levels = [self.release_on_isobath]
-            cs = plt.contour(lon, lat, h, self.isobath_levels)
+            print(f"--- Finding release locations over the {self.release_on_isobath}m isobath")
+            cs = plt.contour(lon, lat, h, levels=self.isobath_levels)
+            plt.close()
             p = cs.allsegs[0][:]
             plon = p[0][:, 0]
             locations_lon = plon[:: self.spacing_locations]
@@ -290,10 +300,11 @@ class opendrift_run(object):
             plat = p[0][:, 1]
             locations_lat = plat[:: self.spacing_locations]
             locations_lat = locations_lat[self.ignore_first : self.ignore_last]
+            print(f"--- {len(locations_lat)} release locations identified over the {self.release_on_isobath}m isobath")
         elif self.release_locations:
             locations_lon = self.release_locations[:, 0]
             locations_lat = self.release_locations[:, 1]
-
+            print(f"--- {len(locations_lat)} release locations provided")
         self.number_of_release_locations = len(locations_lat)
         self.total_number_particles = (
             self.number_of_particles * self.number_of_release_locations
@@ -319,7 +330,7 @@ class opendrift_run(object):
         lons_start = o.elements_scheduled.lon
         lats_start = o.elements_scheduled.lat
         name_con_file = os.path.join(
-            self.outdir, f"{self.year}{self.month}_Particles_{id}.txt"
+            self.outdir, f"{self.year}{self.month}_Particles_{self.id}.txt"
         )
         _, index_of_last = o.index_of_activation_and_deactivation()
         lons = o.get_property("lon")[0]
@@ -352,14 +363,14 @@ class opendrift_run(object):
         self.month = ini.dt.month.data
         self.month = "%02d" % self.month
         self.year = ini.dt.year.data
-        o, reader = self.set_opendrift_configuration()
+        self.o, reader = self.set_opendrift_configuration()
         if self.vertical_mixing:
-            self.set_opendrift_vertical_motion_configuration(o)
+            self.set_opendrift_vertical_motion_configuration()
         if self.habitat:
-            self.set_opendrift_habitat_settlement(o)
+            self.set_opendrift_habitat_settlement()
         if self.behaviour:
-            self.set_opendrift_behaviour_configuration(o)
-
+           self.set_opendrift_behaviour_configuration()
+        print('--- OpenDrift Configuration set')
 
         runtime = self.set_runtime(ds)
         file_name = os.path.join(
@@ -368,9 +379,10 @@ class opendrift_run(object):
         times = self.create_seed_times(
             runtime[0], runtime[1], timedelta(hours=self.release_interval)
         )
-        release_lon, release_lat = self.get_release_locations(ds, reader)
-
-        for time in times:
+        print(f'--- Particles seeded from {datetime.strftime(runtime[0], " %H:%M %m/%d/%Y")} to {datetime.strftime(runtime[1], " %H:%M %m/%d/%Y")} every {self.release_interval} hours')
+        self.release_lon, self.release_lat = self.get_release_locations(ds, reader)
+        print(f"--- Number of release locations: {self.number_of_release_locations}")
+        for ii, time in enumerate(times):
             if self.random_depth:
                 if isinstance(self.random_depth, bool):
                     z = np.random.uniform(
@@ -378,27 +390,33 @@ class opendrift_run(object):
                         0,
                         size=self.total_number_particles,
                     )
+                    if ii==0:
+                        print(f"--- Particles released at random depths throughout the water column")
                 else:
                     random_depth = np.abs(self.random_depth)
                     z = np.random.uniform(
                         -random_depth, 0, size=self.total_number_particles
                     )
+                    if ii==0:
+                        print(f"--- Particles released at random depths throughout from {random_depth} to the surface")
             else:  # constant depth
                 z = np.ones(self.total_number_particles) * self.depth
+                if ii==0:
+                    print(f"--- Particles released at a constant depth of {z} meters")
             for n in range(self.number_of_release_locations):
-                o.seed_elements(
-                    release_lon[n :: self.number_of_release_locations],
-                    release_lat[n :: self.number_of_release_locations],
+                self.o.seed_elements(
+                    self.release_lon[n :: self.number_of_release_locations],
+                    self.release_lat[n :: self.number_of_release_locations],
                     number=self.number_of_particles,
                     z=z[n :: self.number_of_release_locations],
                     time=time,
                     origin_marker=n,
                 )  # , terminal_velocity=-0.001)
-
-        o.run(
-            stop_on_error=False,
+        self.o.plot()
+        print('--- Particles seeded starting OpenDrift run')
+        self.o.run(
             time_step=self.time_step_advection,
-            end_time=runtime[0],
+            end_time=self.run_until,
             outfile=file_name,
             time_step_output=self.time_step_output,
             export_variables=[
@@ -413,6 +431,7 @@ class opendrift_run(object):
         )
         if self.first_and_last_position:
             self.get_first_and_last_position(o)
+            print('--- Saving first and last position file')
 
 
 #      o.animation(color='z',filename='/nesi/project/uoo02643/BoP_1km/Opendrift/2003'+m+'_Particles_'+str(iso[j])+'.mp4', corners=[175.7, 180, -38, -35.3], show_elements=True)

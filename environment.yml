@@ -4,6 +4,7 @@ channels:
 dependencies:
   - matplotlib>=3.5
   - numpy>=1.17
+  - scikit-learn-intelex
   - scipy>=1.6
   - netcdf4<=1.6.1
   - ffmpeg
