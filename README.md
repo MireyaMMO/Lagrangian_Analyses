@@ -18,4 +18,5 @@ Analyses and calculations covered in this repository regarding chapter 2 and cha
 - PDF (Probability Density Functions)
 - Connectivity Matrices
 - Dispersal Kernels
+- Stranded Particle data (average duration before stranding and locations)
 

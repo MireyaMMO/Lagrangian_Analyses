@@ -18,14 +18,14 @@ class opendrift_run(object):
 
     Environment Parameters
     ----------------------
-        month: int
-            month when the lagrangian experiment starts
-        year: int
-            year when the lagrangian experiment starts
         file_path: str
             path of the file where the velocities are located
         outdir: str
             path of the directory where to save the output
+        id: str
+            Id to identify the experiment
+        var_dict: dict
+            Dictionary containing the names associated to the depth and time variables within the file. Default ROMS convention: {"depth": "h", "time": "ocean_time"}
 
     OpenDrift Parameters
     --------------------
@@ -111,10 +111,10 @@ class opendrift_run(object):
 
     def __init__(
         self,
-        month,
-        year,
         file_path,
         outdir,
+        id=None,
+        vars_dict={'time':'ocean_time', 'depth':'h'},
         log_level=50,
         opendrift_reader="reader_ROMS_native",
         opendrift_model="OceanDrift",
@@ -124,7 +124,7 @@ class opendrift_run(object):
         ignore_first=0,
         ignore_last=-1,
         release_interval=3,
-        advection_duration=50,
+        advection_duration=50*24*3600,
         release_on_isobath=None,
         release_locations=None,
         cluster_std=0.003,
@@ -146,9 +146,9 @@ class opendrift_run(object):
         time_step_output=3600 * 3,
         first_and_last_position=False,
     ):
-        self.month = month
-        self.m = "%02d" % self.month
-        self.year = str(year)
+        # self.month = month
+        # self.m = "%02d" % self.month
+        # self.year = str(year)
         self.file_path = file_path
         self.outdir = outdir
 
@@ -275,7 +275,7 @@ class opendrift_run(object):
         return out
 
     def get_release_locations(self, ds, reader):
-        h = ds.h
+        h = ds[self.depth_var]
         lon = reader.lon
         lat = reader.lat
         latf = lon.flatten()
@@ -320,7 +320,7 @@ class opendrift_run(object):
         lons_start = o.elements_scheduled.lon
         lats_start = o.elements_scheduled.lat
         name_con_file = os.path.join(
-            self.outdir, f"{self.year}{self.m}_Particles_{self.release_on_isobath}m.txt"
+            self.outdir, f"{self.year}{self.month}_Particles_{id}.txt"
         )
         _, index_of_last = o.index_of_activation_and_deactivation()
         lons = o.get_property("lon")[0]
@@ -338,6 +338,21 @@ class opendrift_run(object):
         
     def run(self):
         self.set_directories()  # creates directory for output
+        if len(self.file_path)>1: 
+            ds = xr.open_mfdataset(self.file_path)
+        else:
+            ds = xr.open_dataset(self.file_path)
+        self.time_var = self.vars_dict["time"]
+        self.depth_var = self.vars_dict["depth"]
+        ini, end =ds[self.time_var].isel({self.time_var:[0,-1]})
+        file_period = (end-ini).dt.total_seconds()
+        try:
+            file_period>self.advection_duration
+        except:
+            print('Files provided do not cover the full advection period')
+        self.month = ini.dt.month.data
+        self.month = "%02d" % self.month
+        self.year = ini.dt.year.data
         o, reader = self.set_opendrift_configuration()
         if self.vertical_mixing:
             self.set_opendrift_vertical_motion_configuration(o)
@@ -346,10 +361,10 @@ class opendrift_run(object):
         if self.behaviour:
             self.set_opendrift_behaviour_configuration(o)
 
-        ds = xr.open_dataset(self.file_path)
+
         runtime = self.set_runtime(ds)
         file_name = os.path.join(
-            self.outdir, f"{self.year}{self.m}_Particles_{self.release_on_isobath}m.nc"
+            self.outdir, f"{self.year}{self.month}_Particles_{self.id}.nc"
         )
         times = self.create_seed_times(
             runtime[0], runtime[1], timedelta(hours=self.release_interval)
