@@ -280,7 +280,6 @@ class opendrift_run(object):
         lat = reader.lat
         latf = lon.flatten()
         lonf = lat.flatten()
-        points = np.vstack((lonf, latf)).T
         if self.release_on_isobath:
             self.isobath_levels = [self.release_on_isobath]
             cs = plt.contour(lon, lat, h, self.isobath_levels)
