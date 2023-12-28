@@ -384,7 +384,6 @@ class opendrift_run(object):
         )
         print(f'--- Particles seeded from {datetime.strftime(runtime[0], " %H:%M %m/%d/%Y")} to {datetime.strftime(runtime[1], " %H:%M %m/%d/%Y")} every {self.release_interval} hours')
         self.release_lon, self.release_lat = self.get_release_locations(ds, reader)
-        print(f"--- Number of release locations: {self.number_of_release_locations}")
         for ii, time in enumerate(times):
             if self.random_depth:
                 if isinstance(self.random_depth, bool):
