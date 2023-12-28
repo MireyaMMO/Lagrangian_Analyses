@@ -5,7 +5,7 @@ import matplotlib
 import logging
 from numpy import random, histogram2d
 from scipy.interpolate import interp2d
-from .utils import *
+from Lagrangian_Analyses.utils import *
 import pickle
 import matplotlib.pyplot as plt
 import os
