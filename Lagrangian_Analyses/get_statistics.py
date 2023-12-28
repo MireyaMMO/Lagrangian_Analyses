@@ -7,6 +7,10 @@ from numpy import random, histogram2d
 from scipy.interpolate import interp2d
 from .utils import *
 import pickle
+import matplotlib.pyplot as plt
+
+plt.rcParams['font.family'] = 'DeJavu Serif'
+plt.rcParams['font.serif'] = ['Times New Roman']  
 
 logging.basicConfig(level=logging.INFO)
 

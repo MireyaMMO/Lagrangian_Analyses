@@ -9,6 +9,9 @@ from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 from sklearn.datasets import make_blobs
 
+plt.rcParams['font.family'] = 'DeJavu Serif'
+plt.rcParams['font.serif'] = ['Times New Roman']  
+
 logging.basicConfig(level=logging.INFO)
 
 class opendrift_run(object):
@@ -124,13 +127,13 @@ class opendrift_run(object):
         cluster_std = 0.003,
         random_depth = 20,
         depth = 0,
-        release_on_isobath = 200,
+        release_on_isobath = 65,
         spacing_locations = 10,
         ignore_first = 0,
         ignore_last = -1,
         release_locations=False,
         release_interval=3,
-        release_until = 10*24*3600,
+        release_until = 1*24*3600,
         advection_duration=5*24*3600,
         max_speed=5,
         advection_scheme="runge-kutta4",
@@ -430,7 +433,7 @@ class opendrift_run(object):
             ],
         )
         if self.first_and_last_position:
-            self.get_first_and_last_position(o)
+            self.get_first_and_last_position(self.o)
             print('--- Saving first and last position file')
 
 
