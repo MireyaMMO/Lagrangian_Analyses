@@ -346,7 +346,7 @@ class opendrift_run(object):
         for lon_start, lat_start, lon_end, lat_end, status in zip(
             lons_start, lats_start, lons_end, lats_end, status_end
         ):
-            outFile.write(f"{lon_start},{lat_start},{lon_end},{lat_end},status\n")
+            outFile.write(f"{lon_start},{lat_start},{lon_end},{lat_end}, {status}\n")
         outFile.close()
         
     def run(self):

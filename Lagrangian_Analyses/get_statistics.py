@@ -17,6 +17,33 @@ logging.basicConfig(level=logging.INFO)
 
 
 class get_statistics(object):
+    """
+    get_statistics
+    Computes Lagrangian statistic from a given file or list of files
+
+    Parameters:
+    -----------
+        file_list: str
+            List of OpenDrift files to analyse
+        outdir: str
+            path of the directory where to save the output
+        id: str
+            Id to identify the experiment
+        PDF: boolean or arr
+            If True it calculates the normalised PDF. If true provide the number of bins required [120,90] for the BoP experiments
+        CM: boolean
+            If True it calculates the normalised Connectivity Matrix. (Average if multiple files are provided).
+        CV: boolean
+            If True it calculates the Coefficient of Variation of the Connectivity Matrix. This only works when there are multiple connectivity matrices available.
+        stranded: boolean
+            If True it estimates different values of interest of stranding/beaching of particles.
+        time_of_interest: int
+            Time at which the user wants to calculate all this parameters.
+        time_of_interest_units: str
+            Units of the time of interest defined previously. i.e. 'D' for days, 'H' for hours
+        patch: str
+            If CM is needed the user must provide a file containing the division of regions.
+    """
     def __init__(
         self,
         file_list,
@@ -52,6 +79,7 @@ class get_statistics(object):
             os.makedirs(self.outdir)
 
     def get_requested_time_step_index(self, time):
+        """Obtains the requested time step index looking into the delta time of the data"""
         delta_time = time[1] - time[0]
         delta_time = int(delta_time.dt.total_seconds())
         index_interval = np.timedelta64(
@@ -60,6 +88,7 @@ class get_statistics(object):
         return int(index_interval)
 
     def get_connectivity_matrix(self, CM, patches):
+        """With a provided file calculates the connectivity matrix for the domain"""
         temporal_arr = make_nan_array(len(patches), 275000)
         matrix = np.zeros((len(self.release_locations), len(patches) + 1))
         for count, patch in enumerate(patches):
@@ -87,6 +116,7 @@ class get_statistics(object):
         return edges[:-1] + np.diff(edges[:2]) / 2
 
     def get_pdf(self, PDF):
+        """Calculates de Probability Density Function in 2D"""
         x = PDF[:, 0]
         y = PDF[:, 1]
         nogood = np.where(y > 0)[0]
@@ -105,6 +135,7 @@ class get_statistics(object):
         return n_pdf, xedges, yedges
 
     def get_data_from_file(self, ds):
+        """Obtains the needed data from the OpenDrift file"""
         lon = ds.lon.where(ds.lon < 9.0e35, np.nan)
         lon = lon.where(lon > 0, lon + 360)
         lat = ds.lat.where(ds.lat < 9.0e35, np.nan)
@@ -120,6 +151,7 @@ class get_statistics(object):
     def get_lon_lat_and_origin(
         self, lon, lat, requested_index, status, origin_marker, number_of_particles
     ):
+        """Obtains the lon lat and origin marker of each trajectory at the desired time"""
         CM = make_nan_array(number_of_particles, 3)
         for count in range(number_of_particles):
             active_particle = status.sel(trajectory=count + 1)
@@ -144,6 +176,7 @@ class get_statistics(object):
         origin_marker,
         number_of_particles,
     ):
+        """Obtains data from the stranded particles"""
         for count in range(number_of_particles):
             particles = status.sel(trajectory=count + 1)
             index_of_release = np.where(particles == 0)[0][0]
@@ -258,7 +291,7 @@ class get_statistics(object):
             )
         if self.CV:
             print(
-                "--- Adding Connectivity Matrix associated parameters to {self.outdir}/CM_{self.id}.p \n - CV"
+                f"--- Adding Connectivity Matrix associated parameters to {self.outdir}/CM_{self.id}.p \n - CV"
             )
             std_CM = np.nanstd(Matrix, axis=0)[::-1]
             std_CM[np.where(std_CM == 0)] = np.nan
@@ -283,7 +316,7 @@ class get_statistics(object):
             )
             pickle.dump(
                 [
-                    avg_duration,
+                    float(avg_duration),
                     norm_avg_particles_stranded,
                     self.duration_before_stranding,
                     self.lon_stranding,

@@ -4,8 +4,10 @@ from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 
 
 def sph2xy(lambda0, lambda1, theta0, theta1):
-    ############# SPH2XY Spherical to curvilinear spherical. ############
-    ##### where X,Y are in meters and LAMBDA0,THETA0 are in degrees#####
+    """ 
+    shp2xy Spherical to curvilinear spherical. 
+    where X,Y are in meters and LAMBDA0,THETA0 are in degrees
+    """
     R = 6371 * 1e3
     deg2rad = np.pi / 180
     x = R * (lambda0 - lambda1) * deg2rad * np.cos(theta1 * deg2rad)
@@ -14,8 +16,10 @@ def sph2xy(lambda0, lambda1, theta0, theta1):
 
 
 def xy2sph(x, lambda1, y, theta1):
-    ############# XY2SPH Curvilinear spherical to spherical. ############
-    ##### where X,Y are in meters and LAMBDA1,THETA1 are in degrees#####
+    """
+    xy2sph Curvilinear spherical to spherical.
+    where X,Y are in meters and LAMBDA1,THETA1 are in degrees
+    """
     R = 6371 * 1e3
     deg2rad = np.pi / 180
     lambda0 = lambda1 + x / (R * np.cos(theta1 * deg2rad)) / deg2rad
@@ -23,7 +27,7 @@ def xy2sph(x, lambda1, y, theta1):
     return lambda0, theta0
 
 def make_nan_array(i,j=None,k=None,l=None):
-    ##Makes arrays fill of NaN##
+    """Makes arrays fill of NaN"""
     if i and not j:
         arr = np.zeros((i))
         arr *= np.nan 
@@ -39,6 +43,7 @@ def make_nan_array(i,j=None,k=None,l=None):
     return arr 
         
 def get_colourmap(name):
+    """Gets colourmap from the defined personal library"""
     if name == "Zissou":
         colors = [
             (0.98, 0.98, 0.95),
