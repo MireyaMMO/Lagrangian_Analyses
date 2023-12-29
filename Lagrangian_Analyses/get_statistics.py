@@ -7,14 +7,9 @@ from numpy import random, histogram2d
 from scipy.interpolate import interp2d
 from Lagrangian_Analyses.utils import *
 import pickle
-import matplotlib.pyplot as plt
 import os
 
-plt.rcParams["font.family"] = "DeJavu Serif"
-plt.rcParams["font.serif"] = ["Times New Roman"]
-
 logging.basicConfig(level=logging.INFO)
-
 
 class get_statistics(object):
     """
