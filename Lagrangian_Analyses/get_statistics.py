@@ -294,7 +294,6 @@ class get_statistics(object):
                 f"--- Adding Connectivity Matrix associated parameters to {self.outdir}/CM_{self.id}.p \n - CV"
             )
             std_CM = np.nanstd(Matrix, axis=0)
-            print(std_CM)
             std_CM[np.where(std_CM == 0)] = np.nan
             self.CV = std_CM / self.avg_CM
             pickle.dump(
