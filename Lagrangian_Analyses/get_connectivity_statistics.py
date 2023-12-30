@@ -11,7 +11,7 @@ import os
 
 logging.basicConfig(level=logging.INFO)
 
-class get_statistics(object):
+class get_connectivity_statistics(object):
     """
     get_statistics
     Computes Lagrangian statistic from a given file or list of files

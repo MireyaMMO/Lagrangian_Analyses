@@ -51,7 +51,7 @@ class get_dispersal_kernel(object):
         self.id = id
         self.predominant_direction = predominant_direction
         self.xmin = xmin
-        self.xmax = xmax 
+        self.xmax = xmax
         self.bins = bins
         self.time_of_interest = time_of_interest
         self.time_of_interest_units = time_of_interest_units
@@ -175,7 +175,12 @@ class get_dispersal_kernel(object):
                 * np.exp(-np.power((xi - mean) / std_dev, 2) / 2)
             )
             n_y = y / np.sum(y)
-            dict_kde[f'loc_{"%02d"%location}'] = {'x':xi, 'y':n_y, 'mean':mean, 'std_dev':std_dev}
+            dict_kde[f'loc_{"%02d"%location}'] = {
+                "x": xi,
+                "y": n_y,
+                "mean": mean,
+                "std_dev": std_dev,
+            }
         return dict_kde
 
     def run(self):
