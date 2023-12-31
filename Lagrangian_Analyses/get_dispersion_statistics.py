@@ -69,15 +69,20 @@ class get_dispersion_statistics(object):
         lon = ds.lon.where(ds.lon < 9.0e35, np.nan)
         lon = lon.where(lon > 0, lon + 360)
         lat = ds.lat.where(ds.lat < 9.0e35, np.nan)
+        lonmin = np.min(lon)
+        latmin = np.min(lat)
         self.get_delta_time(ds.time)
         self.time_step = np.hstack((0, ds['time'].diff('time').dt.total_seconds().cumsum().data))
         status = ds.status.where(~np.isnan(lon), np.nan)
         origin_marker = ds.origin_marker.where(~np.isnan(lon), np.nan)
+        x,y = sph2xy(lonmin, lon, latmin, lat)
         age = ds.age_seconds.where(~np.isnan(lon), np.nan)
         number_of_particles = len(ds["trajectory"])
         return (
             lon,
             lat,
+            np.abs(x)*1e-3,
+            np.abs(y)*1e-3,
             status,
             origin_marker,
             age,
@@ -135,12 +140,14 @@ class get_dispersion_statistics(object):
                             for second_count, (lon_, lat_) in enumerate(
                                 zip(next_lons, next_lats)
                             ):
-                                x = haversine(
-                                    lon_trajectory, lat_trajectory, lon_, lat_trajectory
-                                )
-                                y = haversine(
-                                    lon_trajectory, lat_trajectory, lon_trajectory, lat_
-                                )
+                                #x = haversine(
+                                #    lon_trajectory, lat_trajectory, lon_, lat_trajectory
+                                #)
+                                #y = haversine(
+                                #    lon_trajectory, lat_trajectory, lon_trajectory, lat_
+                                #)
+                                x = np.abs(lon_trajectory - lon_)
+                                y = np.abs(lat_trajectory - lat_)
                                 pair_of_particles+=1
                                 if time == time_cluster[0]:
                                     xo = np.copy(x)
@@ -225,13 +232,15 @@ class get_dispersion_statistics(object):
                     if time_count == 0:
                         lon0 = lon_.isel(time=0)
                         lat0 = lat_.isel(time=0)
-                        X = 0
-                        Y = 0
+                        X = xr.DataArray(data=[0], dims='time', coords={'time':time_count})
+                        Y = xr.DataArray(data=[0], dims='time', coords={'time':time_count})
                     else:
                         lon_trajectory = lon_.isel(time=time_count)
                         lat_trajectory = lat_.isel(time=time_count)
-                        x = haversine(lon0, lat0, lon_trajectory, lat0)
-                        y = haversine(lon0, lat0, lon0, lat_trajectory)
+                        #x = haversine(lon0, lat0, lon_trajectory, lat0)
+                        #y = haversine(lon0, lat0, lon0, lat_trajectory)
+                        x = (lon_trajectory-lon0).assign_coords({'time':time_count}).drop('trajectory')
+                        y = (lat_trajectory-lat0).assign_coords({'time':time_count}).drop('trajectory')
                         X = np.hstack((X, x))
                         Y = np.hstack((Y, y))
                 DX_per_location[count, 0 : time_count + 1] = X
@@ -273,6 +282,8 @@ class get_dispersion_statistics(object):
             (
                 lon,
                 lat,
+                x,
+                y,
                 _,
                 origin_marker,
                 _,
@@ -283,8 +294,8 @@ class get_dispersion_statistics(object):
             ]
             if self.AD:
                 AX, AY, AT, NP = self.get_absolute_dispersion(
-                    lon,
-                    lat,
+                    x,
+                    y,
                     origin_marker,
                 )
                 if self.first_AD:
@@ -301,8 +312,8 @@ class get_dispersion_statistics(object):
 
             if self.RD:
                 RX, RY, RT, PP = self.get_relative_dispersion(
-                    lon,
-                    lat,
+                    x,
+                    y,
                     origin_marker,
                 )
                 if self.first_RD:
