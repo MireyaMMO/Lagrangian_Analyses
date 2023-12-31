@@ -8,7 +8,7 @@
     - [Lagrangian\_Analyses](#lagrangian_analyses-1)
     - [notebooks](#notebooks)
       - [notebooks/data](#notebooksdata)
-    - [notebooks/output](#notebooksoutput)
+      - [notebooks/output](#notebooksoutput)
   - [References](#references)
   - [Additional info](#additional-info)
       - [Personalised colourmap options ](#personalised-colourmap-options-)
@@ -103,7 +103,7 @@ docker run -ti mmontao/lagrangian:$tag bash
 - [`notebook_02/%yyyy%mm_Particles_40_nb.nc`](https://github.com/MireyaMMO/Lagrangian_Analyses/tree/main/notebooks/data/notebook_02)
 Contains the data needed to replicate the PDF, Connectivity Matrix and coefficient of variance for the January experiment as seen in Chapter 4 of Montano et al 2023. Map of regions shown below. However to reduce the size of the repository only the years from 2010 to 2020 are added. 
 
-### [notebooks/output](https://github.com/MireyaMMO/Lagrangian_Analyses/tree/main/notebooks/output)
+#### [notebooks/output](https://github.com/MireyaMMO/Lagrangian_Analyses/tree/main/notebooks/output)
 Contains the output obtained from each of the jupyter notebooks mentioned above 
   - [notebook_01](https://github.com/MireyaMMO/Lagrangian_Analyses/tree/main/notebooks/output/notebook_01)
     - [200301_Particles_control.nc](https://github.com/MireyaMMO/Lagrangian_Analyses/tree/main/notebooks/output/notebook_01/200301_Particles_control.nc) OpenDrift output
