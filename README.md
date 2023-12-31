@@ -100,7 +100,7 @@ docker run -ti mmontao/lagrangian:$tag bash
   - [03_dispersal_kernel.ipynb](https://github.com/MireyaMMO/Lagrangian_Analyses/blob/main/notebooks/03_dispersal_kernel.ipynb): Jupyter Notebook containing an example of how to use [get_dispersal_kernel](https://github.com/MireyaMMO/Lagrangian_Analyses/blob/main/Lagrangian_Analyses/get_dispersal_kernel.py).
   - [04_dispersion_statistics.ipynb](https://github.com/MireyaMMO/Lagrangian_Analyses/blob/main/notebooks/04_dispersion_statistics.ipynb): Jupyter Notebook containing an example of how to use [get_dispersion_statistics](https://github.com/MireyaMMO/Lagrangian_Analyses/blob/main/Lagrangian_Analyses/get_dispersion_statistics.py).
 #### [notebooks/data](https://github.com/MireyaMMO/Lagrangian_Analyses/tree/main/notebooks/data)
-- `notebook_02/%yyyy%mm_Particles_40_nb.nc`(https://github.com/MireyaMMO/Lagrangian_Analyses/tree/main/notebooks/data/notebook_02)
+- [`notebook_02/%yyyy%mm_Particles_40_nb.nc`](https://github.com/MireyaMMO/Lagrangian_Analyses/tree/main/notebooks/data/notebook_02)
 Contains the data needed to replicate the PDF, Connectivity Matrix and coefficient of variance for the January experiment as seen in Chapter 4 of Montano et al 2023. Map of regions shown below. However to reduce the size of the repository only the years from 2010 to 2020 are added. 
 
 ### [notebooks/output](https://github.com/MireyaMMO/Lagrangian_Analyses/tree/main/notebooks/output)
