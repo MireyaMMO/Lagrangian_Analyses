@@ -7,8 +7,8 @@
   - [Contents](#contents)
     - [Lagrangian\_Analyses](#lagrangian_analyses-1)
     - [notebooks](#notebooks)
-      - [data](#data)
-      - [output](#output)
+      - [notebooks/data](#notebooksdata)
+    - [notebooks/output](#notebooksoutput)
   - [References](#references)
   - [Additional info](#additional-info)
       - [Personalised colourmap options ](#personalised-colourmap-options-)
@@ -99,11 +99,11 @@ docker run -ti mmontao/lagrangian:$tag bash
   - [02_connectivity_statistics.ipynb](https://github.com/MireyaMMO/Lagrangian_Analyses/blob/main/notebooks/02_lagrangian_statistics.ipynb): Jupyter Notebook containing an example of how to use [get_connectivity_statistics](https://github.com/MireyaMMO/Lagrangian_Analyses/blob/main/Lagrangian_Analyses/get_connectivity_statistics.py).
   - [03_dispersal_kernel.ipynb](https://github.com/MireyaMMO/Lagrangian_Analyses/blob/main/notebooks/03_dispersal_kernel.ipynb): Jupyter Notebook containing an example of how to use [get_dispersal_kernel](https://github.com/MireyaMMO/Lagrangian_Analyses/blob/main/Lagrangian_Analyses/get_dispersal_kernel.py).
   - [04_dispersion_statistics.ipynb](https://github.com/MireyaMMO/Lagrangian_Analyses/blob/main/notebooks/04_dispersion_statistics.ipynb): Jupyter Notebook containing an example of how to use [get_dispersion_statistics](https://github.com/MireyaMMO/Lagrangian_Analyses/blob/main/Lagrangian_Analyses/get_dispersion_statistics.py).
-#### data
-- `%yyyy%mm_Particles_40_nb.nc`
+#### [notebooks/data](https://github.com/MireyaMMO/Lagrangian_Analyses/tree/main/notebooks/data)
+- `notebook_02/%yyyy%mm_Particles_40_nb.nc`
 Contains the data needed to replicate the PDF, Connectivity Matrix and coefficient of variance for the January experiment as seen in Chapter 4 of Montano et al 2023. Map of regions shown below. However to reduce the size of the repository only the years from 2010 to 2020 are added. 
 
-#### output
+### [notebooks/output](https://github.com/MireyaMMO/Lagrangian_Analyses/tree/main/notebooks/output)
 Contains the output obtained from each of the jupyter notebooks mentioned above 
   - [notebook_01](https://github.com/MireyaMMO/Lagrangian_Analyses/tree/main/notebooks/output/notebook_01)
     - [200301_Particles_control.nc](https://github.com/MireyaMMO/Lagrangian_Analyses/tree/main/notebooks/output/notebook_01/200301_Particles_control.nc) OpenDrift output
@@ -129,6 +129,9 @@ Contains the output obtained from each of the jupyter notebooks mentioned above
 
 - Moana Project Data on [THREDDS](http://thredds.moanaproject.org:6443/thredds/catalog/moana/catalog.html) 
 
+**OpenDrift**
+
+[Dagestad, K.-F., Rohrs, J., Breivik, O., and Ådlandsvik, B. (2018). OpenDrift v1.0: a generic framework for trajectory modelling. Geoscientific Model Development, 11 (4), 1405–1420.](https://github.com/OpenDrift/opendrift)
 
 ## Additional info
 #### Personalised colourmap options ![Alt text](notebooks/data/Colourmap_examples.png)
