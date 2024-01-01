@@ -1,4 +1,5 @@
 # Lagrangian_Analyses
+[![DOI](https://zenodo.org/badge/735771271.svg)](https://zenodo.org/doi/10.5281/zenodo.10448362)
 
 - [Lagrangian\_Analyses](#lagrangian_analyses)
   - [Description](#description)
